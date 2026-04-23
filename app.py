@@ -82,11 +82,11 @@ def inject_global_css() -> None:
             max-width: 1560px;
           }
           .panel {
-            background: rgba(255, 255, 255, 0.94);
-            border: 1px solid #E5E7EB;
-            border-radius: 24px;
-            box-shadow: 0 20px 48px rgba(15, 23, 42, 0.06);
-            padding: 1.15rem 1.2rem;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0;
           }
           .hero {
             display: flex;
@@ -95,14 +95,7 @@ def inject_global_css() -> None:
             margin-bottom: 1rem;
           }
           .hero-badge {
-            width: 48px;
-            height: 48px;
-            border-radius: 16px;
-            display: grid;
-            place-items: center;
-            background: linear-gradient(135deg, #E6F0FF 0%, #DDF8F0 100%);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
-            font-size: 22px;
+            display: none;
           }
           .hero-title {
             font-size: 1.1rem;
@@ -155,9 +148,9 @@ def inject_global_css() -> None:
           }
           .mini-card {
             padding: 16px 18px;
-            border-radius: 18px;
-            background: #F8FAFC;
-            border: 1px solid #E5E7EB;
+            border-radius: 0;
+            background: transparent;
+            border: none;
             margin-bottom: 10px;
           }
           .mini-label {
@@ -180,10 +173,10 @@ def inject_global_css() -> None:
             justify-content: space-between;
             align-items: center;
             gap: 12px;
-            padding: 12px 14px;
-            border-radius: 16px;
-            background: #F8FAFC;
-            border: 1px solid #E5E7EB;
+            padding: 8px 0;
+            border-radius: 0;
+            background: transparent;
+            border: none;
             margin-bottom: 10px;
           }
           .field-name {
@@ -224,17 +217,17 @@ def inject_global_css() -> None:
           .fund-row {
             position: relative;
             overflow: hidden;
-            border-radius: 18px;
-            border: 1px solid #E5E7EB;
-            background: #FFFFFF;
+            border-radius: 0;
+            border: none;
+            background: transparent;
             margin-bottom: 10px;
           }
           .fund-fill {
             position: absolute;
-            left: 8px;
-            top: 8px;
-            bottom: 8px;
-            border-radius: 12px;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            border-radius: 0;
           }
           .fund-content {
             position: relative;
@@ -245,19 +238,19 @@ def inject_global_css() -> None:
             padding: 14px 16px;
           }
           .upload-note {
-            padding: 16px 18px;
-            border-radius: 18px;
+            padding: 0;
+            border-radius: 0;
             font-size: 0.9rem;
             line-height: 1.7;
           }
           .upload-note.ok {
-            background: #ECFDF5;
-            border: 1px solid #A7F3D0;
+            background: transparent;
+            border: none;
             color: #047857;
           }
           .upload-note.warn {
-            background: #FFF7ED;
-            border: 1px solid #FED7AA;
+            background: transparent;
+            border: none;
             color: #9A3412;
           }
           .outline-top {
@@ -272,14 +265,14 @@ def inject_global_css() -> None:
           }
           .outline-line {
             padding: 10px 12px;
-            border-radius: 14px;
-            background: #FFFFFF;
-            border: 1px solid #DBEAFE;
+            border-radius: 0;
+            background: transparent;
+            border: none;
             margin-top: 10px;
           }
           .outline-line.child {
-            background: #F1F5F9;
-            border-color: #E5E7EB;
+            background: transparent;
+            border-color: transparent;
           }
           .outline-flex {
             display: flex;
@@ -297,10 +290,10 @@ def inject_global_css() -> None:
             font-size: 0.79rem;
             font-weight: 800;
             color: #0F172A;
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            border-radius: 999px;
-            padding: 4px 10px;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0;
           }
           .sidebar-caption {
             font-size: 0.78rem;
@@ -321,14 +314,14 @@ def inject_global_css() -> None:
           }
           div[data-testid="stSidebar"] .stButton button,
           .stButton button {
-            border-radius: 999px;
+            border-radius: 0;
             border: 1px solid #D7DEE8;
             background: #FFFFFF;
             color: #374151;
             font-weight: 700;
           }
           .stTextInput input, .stSelectbox select, .stFileUploader section {
-            border-radius: 16px !important;
+            border-radius: 0 !important;
           }
           #MainMenu, footer {
             visibility: hidden;
@@ -566,31 +559,20 @@ def render_fund_composition(summary: dict, amount_unit: str) -> None:
 
 
 def render_execution_panel(execution_file, preview_df) -> None:
+    if not execution_file:
+        return
     st.markdown('<div class="panel">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">집행 현황</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-subtitle">사이드바에서 올린 집행현황 파일을 여기서 바로 확인할 수 있습니다.</div>', unsafe_allow_html=True)
-    if execution_file:
-        st.markdown(
-            f"""
-            <div class="upload-note ok">
-              선택된 파일: <strong>{escape(execution_file.name)}</strong><br/>
-              파일 크기: {execution_file.size / 1024 / 1024:.2f} MB
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        if preview_df is not None:
-            st.dataframe(preview_df, use_container_width=True, hide_index=True)
-    else:
-        st.markdown(
-            """
-            <div class="upload-note warn">
-              아직 업로드된 집행 파일이 없습니다. 사이드바의 집행현황 파일 업로드 영역에서 `.xlsx`, `.xlsm`, `.csv`
-              파일을 올리면 예산 데이터와 함께 검토할 수 있습니다.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+    st.markdown(
+        f"""
+        <div class="upload-note ok">
+          선택된 파일: <strong>{escape(execution_file.name)}</strong><br/>
+          파일 크기: {execution_file.size / 1024 / 1024:.2f} MB
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    if preview_df is not None:
+        st.dataframe(preview_df, use_container_width=True, hide_index=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
 
@@ -681,7 +663,6 @@ def main() -> None:
                 <div class="hero-badge">📊</div>
                 <div>
                   <div class="hero-title">예산 현황 대시보드</div>
-                  <div class="hero-subtitle">기존 Project BD 화면 구조를 유지하면서 업로드형 Streamlit 버전으로 옮긴 페이지입니다.</div>
                 </div>
               </div>
             </div>
@@ -813,7 +794,6 @@ def main() -> None:
             <div class="hero-badge">📊</div>
             <div>
               <div class="hero-title">예산 현황 대시보드</div>
-              <div class="hero-subtitle">검색 결과를 요약, 재원 분석, 상세 편성 기준으로 확인합니다.</div>
             </div>
           </div>
         </div>
