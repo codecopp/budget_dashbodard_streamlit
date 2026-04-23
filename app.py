@@ -568,7 +568,7 @@ def render_fund_composition(summary: dict, amount_unit: str) -> None:
 def render_execution_panel(execution_file, preview_df) -> None:
     st.markdown('<div class="panel">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">집행 현황</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-subtitle">집행 파일 업로드 영역은 유지하되, Streamlit에서는 파일 선택 즉시 미리보기가 보이도록 바꿨습니다.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-subtitle">사이드바에서 올린 집행현황 파일을 여기서 바로 확인할 수 있습니다.</div>', unsafe_allow_html=True)
     if execution_file:
         st.markdown(
             f"""
@@ -585,8 +585,8 @@ def render_execution_panel(execution_file, preview_df) -> None:
         st.markdown(
             """
             <div class="upload-note warn">
-              아직 업로드된 집행 파일이 없습니다. 오른쪽 탭 영역의 업로드 입력으로 `.xlsx`, `.xlsm`, `.csv` 파일을 올리면
-              예산 데이터와 함께 검토할 수 있습니다.
+              아직 업로드된 집행 파일이 없습니다. 사이드바의 집행현황 파일 업로드 영역에서 `.xlsx`, `.xlsm`, `.csv`
+              파일을 올리면 예산 데이터와 함께 검토할 수 있습니다.
             </div>
             """,
             unsafe_allow_html=True,
@@ -644,18 +644,35 @@ def main() -> None:
         "예산 파일 업로드",
         type=["xlsx", "xlsm", "csv"],
         help="원본 예산서(.xlsx) 또는 정규화된 budgets.csv를 업로드할 수 있습니다.",
+        key="budget_file_uploader",
     )
+    execution_file = st.sidebar.file_uploader(
+        "집행현황 파일 업로드",
+        type=["xlsx", "xlsm", "csv"],
+        help="집행 파일은 예산 파일과 별도로 올릴 수 있습니다.",
+        key="execution_file_uploader",
+    )
+    preview_df = None
+    if execution_file:
+        try:
+            preview_df = load_preview_data(execution_file.name, execution_file.getvalue())
+        except Exception as error:  # noqa: BLE001
+            st.sidebar.markdown(
+                f'<div class="upload-note warn">집행 파일 미리보기를 만들지 못했습니다.<br/>{escape(str(error))}</div>',
+                unsafe_allow_html=True,
+            )
 
     if not budget_file:
-        st.sidebar.markdown(
-            """
-            <div class="upload-note warn">
-              먼저 예산 파일을 업로드해 주세요.<br/>
-              원본 프로젝트 기준 샘플 파일은 `/Users/hj/Desktop/hj_code/project_bd/data/budget-source/` 아래에 있습니다.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        if execution_file:
+            st.sidebar.markdown(
+                f"""
+                <div class="upload-note ok">
+                  집행 파일 준비 완료: <strong>{escape(execution_file.name)}</strong><br/>
+                  파일 크기: {execution_file.size / 1024 / 1024:.2f} MB
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
         st.sidebar.markdown("</div>", unsafe_allow_html=True)
         st.markdown(
             """
@@ -672,6 +689,7 @@ def main() -> None:
             unsafe_allow_html=True,
         )
         empty_state("예산 파일을 업로드해 주세요", "좌측 사이드바에서 `.xlsx`, `.xlsm`, `.csv` 파일을 업로드하면 요약, 재원 분석, 집행 현황 탭이 활성화됩니다.")
+        render_execution_panel(execution_file, preview_df)
         return
 
     budget_bytes = budget_file.getvalue()
@@ -833,18 +851,6 @@ def main() -> None:
         render_fund_cards(summary, selected_unit)
         render_fund_composition(summary, selected_unit)
         return
-
-    execution_file = st.file_uploader(
-        "지출집행현황 파일 업로드",
-        type=["xlsx", "xlsm", "csv"],
-        help="집행 파일은 예산 파일과 별도로 올릴 수 있습니다.",
-    )
-    preview_df = None
-    if execution_file:
-        try:
-            preview_df = load_preview_data(execution_file.name, execution_file.getvalue())
-        except Exception as error:  # noqa: BLE001
-            st.warning(f"집행 파일 미리보기를 만들지 못했습니다: {error}")
 
     render_execution_panel(execution_file, preview_df)
     render_detail_table(filtered_items_df, selected_unit, len(filtered_items_df))
